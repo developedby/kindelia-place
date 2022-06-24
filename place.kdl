@@ -1,0 +1,181 @@
+// Kindelia place
+// Clone of reddit's r/place, but for kindelia
+
+
+// Aux definitions
+
+// If function
+fun (If cond on_true on_false) {
+  (If #0 ~       on_false) = on_false
+  (If ~  on_true ~       ) = on_true
+}
+
+// Clip
+fun (ClipMax num max) {
+  (Clip num max) =
+    dup num0 num1 = num;
+    dup max0 max1 = max;
+    (If (> num0 max0) max1 num1)
+}
+
+// Gets an element from a tup5
+fun (GetTup5 tup idx) {
+  (GetTup5 {Tuple5 a0 ~ ~ ~ ~} #0) = a0
+  (GetTup5 {Tuple5 ~ a1 ~ ~ ~} #1) = a1
+  (GetTup5 {Tuple5 ~ ~ a2 ~ ~} #2) = a2
+  (GetTup5 {Tuple5 ~ ~ ~ a3 ~} #3) = a3
+  (GetTup5 {Tuple5 ~ ~ ~ ~ a4} ~ ) = a4
+}
+
+// Gets an element from a tup6
+fun (GetTup6 tup idx) {
+  (GetTup6 {Tuple6 a0 ~ ~ ~ ~ ~} #0) = a0
+  (GetTup6 {Tuple6 ~ a1 ~ ~ ~ ~} #1) = a1
+  (GetTup6 {Tuple6 ~ ~ a2 ~ ~ ~} #2) = a2
+  (GetTup6 {Tuple6 ~ ~ ~ a3 ~ ~} #3) = a3
+  (GetTup6 {Tuple6 ~ ~ ~ ~ a4 ~} #4) = a4
+  (GetTup6 {Tuple6 ~ ~ ~ ~ ~ a5} ~ ) = a5
+}
+
+// Apply function to element of tup5
+fun (MutTup5 tup idx fn) {
+  (MutTup5 {Tuple5 a0 a1 a2 a3 a4} #0 fn) = {Tuple5 (!fn a0) a1 a2 a3 a4}
+  (MutTup5 {Tuple5 a0 a1 a2 a3 a4} #1 fn) = {Tuple5 a0 (!fn a1) a2 a3 a4}
+  (MutTup5 {Tuple5 a0 a1 a2 a3 a4} #2 fn) = {Tuple5 a0 a1 (!fn a2) a3 a4}
+  (MutTup5 {Tuple5 a0 a1 a2 a3 a4} #3 fn) = {Tuple5 a0 a1 a2 (!fn a3) a4}
+  (MutTup5 {Tuple5 a0 a1 a2 a3 a4} ~  fn) = {Tuple5 a0 a1 a2 a3 (!fn a4)}
+}
+
+// Apply function to element of tup6
+fun (MutTup6 tup idx fn) {
+  (MutTup6 {Tuple6 a0 a1 a2 a3 a4 a5} #0 fn) = {Tuple6 (!fn a0) a1 a2 a3 a4 a5}
+  (MutTup6 {Tuple6 a0 a1 a2 a3 a4 a5} #1 fn) = {Tuple6 a0 (!fn a1) a2 a3 a4 a5}
+  (MutTup6 {Tuple6 a0 a1 a2 a3 a4 a5} #2 fn) = {Tuple6 a0 a1 (!fn a2) a3 a4 a5}
+  (MutTup6 {Tuple6 a0 a1 a2 a3 a4 a5} #3 fn) = {Tuple6 a0 a1 a2 (!fn a3) a4 a5}
+  (MutTup6 {Tuple6 a0 a1 a2 a3 a4 a5} #4 fn) = {Tuple6 a0 a1 a2 a3 (!fn a4) a5}
+  (MutTup6 {Tuple6 a0 a1 a2 a3 a4 a5} ~  fn) = {Tuple6 a0 a1 a2 a3 a4 (!fn a5)}
+}
+
+
+// Actual contract
+
+// 30x30 px image
+// Each px has 4 bits for colors
+// Each line can fit 30 pixels
+// Maybe scale to 30x30 chunks?
+
+ctr {Plc_GetImg}
+ctr {Plc_GetLine row_idx} 
+ctr {Plc_GetPx col_idx row_idx}
+ctr {Plc_SetPx col_idx row_idx color}
+
+fun (Plc action) {
+  (Place {Plc_GetImg}) =
+    !load img
+    !done img
+  
+  (Place {Plc_GetLine row_idx}) = 
+    !load img
+    !done (Plc_ImgGLi img (ClipMax row_idx #29))
+
+  (Place {Plc_GetPx col_idx row_idx}) = 
+    !load img
+    !done (Plc_ImgGPx img (ClipMax col_idx #29) (ClipMax row_idx #29))
+
+  (Place {Plc_SetPx col_idx row_idx color}) =
+    !take img
+    !save (Plc_ImgSPx img (ClipMax col_idx #29) (ClipMax row_idx #29) (& color #xF))
+    !done #0
+} with {
+  // Image is 30 int120, divided in 5*6
+  {Tuple5
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+  }
+}
+
+
+// Name: Get line from image
+fun (Plc_ImgGLi img row_idx) {
+  (Plc_ImgGLi img row_idx) =
+    dup i0 i1 = row_idx;
+    (GetTup6 (GetTup5 img i0) (% i1 #6))
+}
+
+// Name: Get pixel in image
+fun (Plc_ImgGPx img col_idx row_idx) {
+  // #4 is the bit size of each pixel
+  // >> to discard lsbs, & to discard msbs
+  (Plc_ImgGPx img col_idx row_idx) =
+    (&
+      (>>
+        (Plc_ImgGLi img row_idx)
+        (* #4 col_idx)
+      )
+      #xF
+    )
+}
+
+// Name: Set pixel in image
+// Undo Layer 1 to set px in img
+// Returns changed image
+fun (Plc_ImgSPx img col_idx row_idx color) {
+  (Plc_ImgSPx img col_idx row_idx color) =
+    dup row0 row1 = row_idx;
+    (MutTup5
+      img
+      row0
+      @tup
+        (MutTup6
+          tup
+          (% row1 #6)
+          @line (Plc_LinSPx line col_idx color)
+        )
+    )
+}
+
+// Name: Set pixel in line
+// Returns the line, changing color of 1 pixel
+fun (Plc_LinSPx line idx color) {
+  // To set bits
+  // Clear
+  //  clr  = (<< #F idx*4)             Move bits to clear to position
+  //  clr2 = (^ #FFFFFFFFFFFFFFF clr)  Create mask by xoring with ones
+  //  clr3 = (& line clr2)             Apply mask to clear the pixel bits
+  // Set
+  //  set  = (<< color idx*4)          Move color to position
+  //  ret  = (| clr3 set)              Set color bits over cleared number
+  (Plc_LinSPx line idx color) =
+    dup i0 i1 = (* idx #4);
+    (|
+      (& line (^ #xFFFFFFFFFFFFFFF (<< #xF i0)))
+      (<< color i1)
+    )
+}
+
+
+run {
+  !call ~ 'Plc' [{Plc_SetPx #0 #0 #1}]
+  !call ~ 'Plc' [{Plc_SetPx #1 #0 #3}]
+  !call ~ 'Plc' [{Plc_SetPx #58 #60 #xF}]
+  !call ~ 'Plc' [{Plc_SetPx #1 #0 #6}]
+  !call ~ 'Plc' [{Plc_SetPx #1 #0 #3}]
+
+  // This breaks the state
+  // !call ~ 'Plc' [{Plc_SetPx #0 #0 {Tuple0}}]
+
+  // !call ~ 'Plc' [{Plc_GetImg}]
+  !call state 'Plc' [{Plc_GetImg}]
+  !done state
+
+  // !call line 'Plc' [{Plc_GetLine #12}]
+  // !done line
+
+  // !call px 'Plc' [{Plc_GetPx #40 #70}]
+  // !done px
+
+  // !done #0
+}
