@@ -1,0 +1,431 @@
+// Kindelia place - Optimized version 2
+// Clone of reddit's r/place, but for kindelia
+
+ctr {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+
+// (Pick29 (>= #14 #29) #14) = #14
+// (Pick29 (>= #58 #29) #58) = #29
+fun (Pick29 cond on_false) {
+  (Pick29 #0 on_false) = on_false
+  (Pick29 ~  ~) = #29
+}
+
+fun (Kdl_Place col_idx row_idx color) {
+  (Kdl_Place ~ ~ {Tuple0}) =
+    !load img
+    !done img
+
+  (Kdl_Place col_idx row_idx color) =
+    !take img
+    !save
+      dup col0 col1 = col_idx;
+      dup row0 row1 = row_idx;
+      dup row10 row11 = (Pick29 (>= row0 #29) row1);
+      (SetPx1
+        img
+        (Pick29 (>= col0 #29) col1)
+        (/ row10 #6)
+        (% row11 #6)
+        (& #xF color)
+      )
+
+    !done #0
+} with {
+  // Image is 30 int120, divided in 2*15
+  {Tuple2
+    {Tuple15 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0}
+    {Tuple15 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0 #0}
+  }
+}
+
+fun (SetPx1 img col_idx row_idx1 row_idx2 color) {
+  (SetPx1 {Tuple2 a0 a1} col_idx #0 row_idx2 color) =
+    {Tuple2 (SetPx2 a0 col_idx row_idx2 color) a1}
+
+  (SetPx1 {Tuple2 a0 a1} col_idx #1 row_idx2 color) =
+    {Tuple2 a0 (SetPx2 a1 col_idx row_idx2 color)}
+}
+
+fun (SetPx2 tup col_idx row_idx color) {
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #0
+    color
+  ) =
+    {Tuple15
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a00 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #1
+    color
+  ) =
+    {Tuple15
+        a00
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a01 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #2
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a02 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #3
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a03 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #4
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a04 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #5
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a05 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #6
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a06 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #7
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a07 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #8
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a08 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a09
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #9
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a09 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a10
+        a11
+        a12
+        a13
+        a14
+    }
+
+    (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #10
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a10 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a11
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #11
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a11 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a12
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #12
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a12 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a13
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #13
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a13 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+        a14
+    }
+
+  (SetPx2
+    {Tuple15 a00 a01 a02 a03 a04 a05 a06 a07 a08 a09 a10 a11 a12 a13 a14}
+    col_idx
+    #14
+    color
+  ) =
+    {Tuple15
+        a00
+        a01
+        a02
+        a03
+        a04
+        a05
+        a06
+        a07
+        a08
+        a09
+        a10
+        a11
+        a12
+        a13
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a14 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+    }
+}
+
+run {
+  !call ~ 'Kdl_Place' [#0 #0 #1]
+  // !call img 'Kdl_Place' [#0 #0 {Tuple0}]
+  // !done img
+  !done #0
+}

@@ -1,0 +1,134 @@
+// Kindelia place - Optimized version
+// Clone of reddit's r/place, but for kindelia
+
+// (Pick29 (>= #14 #29) #14) = #14
+// (Pick29 (>= #58 #29) #58) = #29
+fun (Pick29 cond on_false) {
+  (Pick29 #0 on_false) = on_false
+  (Pick29 ~  ~) = #29
+}
+
+fun (Kdl_Place col_idx row_idx color) {
+  (Kdl_Place ~ ~ {Tuple0}) =
+    !load img
+    !done img
+
+  (Kdl_Place col_idx row_idx color) =
+    !take img
+    !save
+      dup col0 col1 = col_idx;
+      dup row0 row1 = row_idx;
+      dup row10 row11 = (Pick29 (>= row0 #29) row1);
+      (SetPx1
+        img
+        (Pick29 (>= col0 #29) col1)
+        (/ row10 #6)
+        (% row11 #6)
+        (& #xF color)
+      )
+
+    !done #0
+} with {
+  // Image is 30 int120, divided in 2*15
+  {Tuple5
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+    {Tuple6 #0 #0 #0 #0 #0 #0}
+  }
+}
+
+fun (SetPx1 img col_idx row_idx1 row_idx2 color) {
+  (SetPx1 {Tuple5 a0 a1 a2 a3 a4} col_idx #0 row_idx2 color) =
+    {Tuple5 (SetPx2 a0 col_idx row_idx2 color) a1 a2 a3 a4}
+
+  (SetPx1 {Tuple5 a0 a1 a2 a3 a4} col_idx #1 row_idx2 color) =
+    {Tuple5 a0 (SetPx2 a1 col_idx row_idx2 color) a2 a3 a4}
+
+  (SetPx1 {Tuple5 a0 a1 a2 a3 a4} col_idx #2 row_idx2 color) =
+    {Tuple5 a0 a1 (SetPx2 a2 col_idx row_idx2 color) a3 a4}
+
+  (SetPx1 {Tuple5 a0 a1 a2 a3 a4} col_idx #3 row_idx2 color) =
+    {Tuple5 a0 a1 a2 (SetPx2 a3 col_idx row_idx2 color) a4}
+
+  (SetPx1 {Tuple5 a0 a1 a2 a3 a4} col_idx #4 row_idx2 color) =
+    {Tuple5 a0 a1 a2 a3 (SetPx2 a4 col_idx row_idx2 color)}
+}
+
+fun (SetPx2 tup col_idx row_idx color) {
+  (SetPx2 {Tuple6 a0 a1 a2 a3 a4 a5} col_idx #0 color) =
+    {Tuple6 
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a0 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+      a1
+      a2
+      a3
+      a4
+      a5
+    }
+
+  (SetPx2 {Tuple6 a0 a1 a2 a3 a4 a5} col_idx #1 color) =
+    {Tuple6
+      a0
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a1 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+      a2
+      a3
+      a4
+      a5
+    }
+
+  (SetPx2 {Tuple6 a0 a1 a2 a3 a4 a5} col_idx #2 color) =
+    {Tuple6
+      a0
+      a1
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a2 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+      a3
+      a4
+      a5
+    }
+
+  (SetPx2 {Tuple6 a0 a1 a2 a3 a4 a5} col_idx #3 color) =
+    {Tuple6
+      a0
+      a1
+      a2
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a3 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+      a4
+      a5
+    }
+
+  (SetPx2 {Tuple6 a0 a1 a2 a3 a4 a5} col_idx #4 color) =
+    {Tuple6
+      a0
+      a1
+      a2
+      a3
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a4 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+      a5
+    }
+
+  (SetPx2 {Tuple6 a0 a1 a2 a3 a4 a5} col_idx #5 color) =
+    {Tuple6
+      a0
+      a1
+      a2
+      a3
+      a4
+        dup shf0 shf1 = (* col_idx #4);
+        (| (& a5 (^ #xFFFFFFFFFFFFFFF (<< #xF shf0))) (<< color shf1))
+    }
+}
+
+run {
+  !call ~ 'Kdl_Place' [#0 #0 #1]
+  // !call img 'Kdl_Place' [#0 #0 {Tuple0}]
+  // !done img
+  !done #0
+
+  // !done (SetPx3 #xFFFFFFFFFFFFFFF #0 #1)
+}
