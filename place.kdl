@@ -127,7 +127,7 @@ fun (Plc_ImgSPx img col_idx row_idx color) {
     dup row0 row1 = row_idx;
     (MutTup5
       img
-      row0
+      (/ row0 #6)
       @tup
         (MutTup6
           tup
